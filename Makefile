@@ -40,3 +40,6 @@ data-validate:
 
 train-baseline:
 	uv run python scripts/train_baselines.py --config configs/v1-baselines.yaml
+
+train-v2:
+	uv run python scripts/train_v2.py --config configs/v2-two-stage.yaml

@@ -1,0 +1,18 @@
+dataset:
+  processed_dir: data/processed/hm-v1
+  artifacts_dir: artifacts/v2
+split:
+  horizon_days: 7
+popularity:
+  window_days: 7
+candidates:
+  per_source_limit: 200
+ranker:
+  ranking_limit: 200
+als:
+  factors: 64
+  regularization: 0.05
+  iterations: 15
+  random_seed: 42
+evaluation:
+  k_values: [10, 50, 100, 200]
