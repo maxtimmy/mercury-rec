@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install lint typecheck test check run compose-up compose-down audit-public
+.PHONY: help install lint typecheck test check run compose-up compose-down audit-public data-download data-validate train-baseline
 
 help:
-	@printf '%s\n' 'Targets: install lint typecheck test check run compose-up compose-down audit-public'
+	@printf '%s\n' 'Targets: install lint typecheck test check run compose-up compose-down audit-public data-download data-validate train-baseline'
 
 install:
 	uv sync --all-groups
@@ -31,3 +31,12 @@ compose-up:
 
 compose-down:
 	docker compose down --remove-orphans
+
+data-download:
+	uv run python scripts/download_hm_data.py
+
+data-validate:
+	uv run python scripts/prepare_hm_data.py --validate-only
+
+train-baseline:
+	uv run python scripts/train_baselines.py --config configs/v1-baselines.yaml
