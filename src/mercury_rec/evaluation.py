@@ -35,6 +35,7 @@ def evaluate_rankings(
             len(recommended_items) / len(catalog_items) if catalog_items else 0.0
         )
         results[f"novelty_at_{k}"] = _novelty(ranked, item_counts, total_events)
+        results[f"diversity_at_{k}"] = _diversity(ranked)
     return results
 
 
@@ -56,3 +57,14 @@ def _novelty(ranked: list[list[str]], item_counts: dict[str, int], total_events:
     if not items or not total_events:
         return 0.0
     return sum(-log2(item_counts.get(item, 1) / total_events) for item in items) / len(items)
+
+
+def _diversity(ranked: list[list[str]]) -> float:
+    """Mean fraction of unique items in a recommendation list (catalog-agnostic guardrail)."""
+
+    non_empty = [items for items in ranked if items]
+    return (
+        sum(len(set(items)) / len(items) for items in non_empty) / len(non_empty)
+        if non_empty
+        else 0.0
+    )

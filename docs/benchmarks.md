@@ -16,3 +16,9 @@ Dataset snapshot: 31,788,324 transactions from 2018-09-20 through 2020-09-22; 68
 ALS improved catalog coverage and novelty substantially, but the simpler popularity baseline performed better on test Recall@10 and NDCG@10. Therefore V1 does **not** promote ALS as a champion. This is the intended baseline for V2 candidate-source ablations and a ranker, rather than a reason to hide the result.
 
 Run `make train-baseline` after downloading the dataset. Copy measured aggregate results from the local artifact to this table together with the run ID and dataset checksum; never publish raw customer-level outputs.
+
+## V2 — two-stage ranker
+
+V2 is configured but intentionally has no published result yet. Its primary metric is **NDCG@10**; Recall@50, Coverage@50 and Novelty@50 are release guardrails. The training window is the validation cutoff and its following seven-day labels; the final test horizon remains untouched until evaluation.
+
+The benchmark reports Recall/NDCG/MRR plus coverage, novelty and diversity for popularity, ALS, co-occurrence, their candidate union, and the LambdaMART reranker. A model is only considered a challenger after measured test results are added here; V1 remains the baseline, not a champion.

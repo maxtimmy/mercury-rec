@@ -15,3 +15,4 @@ def test_rank_metrics_reward_relevant_early_items() -> None:
     assert metrics["recall_at_2"] == approx(0.75)
     assert metrics["mrr_at_2"] == approx(0.75)
     assert metrics["coverage_at_2"] == approx(0.75)
+    assert metrics["diversity_at_2"] == approx(1.0)
