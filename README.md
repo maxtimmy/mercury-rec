@@ -46,6 +46,7 @@ Client ────────────────────────�
 
 - [Архитектура](docs/architecture.md)
 - [Датасет и provenance](docs/dataset.md)
+- [Результаты benchmark-ов](docs/benchmarks.md)
 - [Данные и feature contracts](docs/data-and-features.md)
 - [API contract](docs/api.md)
 - [ML-подход и evaluation](docs/ml-and-evaluation.md)
@@ -79,4 +80,4 @@ docs/
 
 ## Первый шаг
 
-Начать с V1 по [implementation-plan.md](docs/implementation-plan.md): зафиксировать версию H&M data, schema checks, temporal split и popularity baseline до выбора сложных моделей.
+Начать с V1 по [implementation-plan.md](docs/implementation-plan.md): положить Kaggle token в `~/.kaggle/kaggle.json`, затем выполнить `make data-download`, `make data-validate` и `make train-baseline`. Данные, token и ML artifacts намеренно не попадают в Git.
