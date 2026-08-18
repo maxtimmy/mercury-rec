@@ -22,7 +22,7 @@ dataset:
   source_url: TBD
   retrieved_at_utc: TBD
   license_or_terms_url: TBD
-  archive_sha256: TBD
+  archive_sha256: TBD # deterministic hash across all downloaded Kaggle ZIP files
   raw_schema_version: 1
   adapter_version: TBD
   timezone: UTC
