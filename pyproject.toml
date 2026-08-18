@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mercury-rec"
+version = "0.1.0"
+description = "Real-time personalized recommendation platform for e-commerce"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "MercuryRec contributors" }]
+dependencies = [
+  "fastapi>=0.115,<1.0",
+  "pydantic-settings>=2.6,<3.0",
+  "uvicorn[standard]>=0.32,<1.0",
+]
+
+[dependency-groups]
+dev = [
+  "httpx>=0.28,<1.0",
+  "mypy>=1.13,<2.0",
+  "pre-commit>=4.0,<5.0",
+  "pytest>=8.3,<9.0",
+  "pytest-cov>=6.0,<7.0",
+  "ruff>=0.8,<1.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mercury_rec"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers --cov=mercury_rec --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests", "scripts"]

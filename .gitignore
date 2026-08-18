@@ -1,0 +1,38 @@
+# Python and tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+
+# Local configuration, data, and generated artifacts
+.env
+.env.local
+data/
+artifacts/
+mlruns/
+reports/
+*.log
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Local AI-agent instructions and state must never be published
+.agents/
+.codex/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+AI_INSTRUCTIONS.md
+.cursor/
+.continue/
+.aider*/
+.roo/
+.windsurf/
+.github/copilot-instructions.md
+*.prompt.md
