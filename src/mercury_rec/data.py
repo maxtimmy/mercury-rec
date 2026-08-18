@@ -166,9 +166,11 @@ def _find_archive_checksum(raw_dir: Path) -> str | None:
     if not archives:
         return None
     digest = sha256()
-    with archives[0].open("rb") as archive:
-        for chunk in iter(lambda: archive.read(1024 * 1024), b""):
-            digest.update(chunk)
+    for archive_path in archives:
+        digest.update(archive_path.name.encode("utf-8"))
+        with archive_path.open("rb") as archive:
+            for chunk in iter(lambda: archive.read(1024 * 1024), b""):
+                digest.update(chunk)
     return digest.hexdigest()
 
 

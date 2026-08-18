@@ -4,7 +4,12 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-from mercury_rec.data import DataContractError, make_temporal_split, normalize_raw_dataset
+from mercury_rec.data import (
+    DataContractError,
+    _find_archive_checksum,
+    make_temporal_split,
+    normalize_raw_dataset,
+)
 
 
 def test_normalize_writes_canonical_parquet(tmp_path: Path) -> None:
@@ -56,3 +61,14 @@ def test_normalize_rejects_missing_contract_column(tmp_path: Path) -> None:
 
     with pytest.raises(DataContractError, match="article_id"):
         normalize_raw_dataset(raw, tmp_path / "processed")
+
+
+def test_archive_checksum_changes_when_any_download_changes(tmp_path: Path) -> None:
+    (tmp_path / "articles.csv.zip").write_bytes(b"articles")
+    (tmp_path / "transactions_train.csv.zip").write_bytes(b"transactions")
+
+    original_checksum = _find_archive_checksum(tmp_path)
+    (tmp_path / "transactions_train.csv.zip").write_bytes(b"new-transactions")
+
+    assert original_checksum is not None
+    assert original_checksum != _find_archive_checksum(tmp_path)

@@ -6,9 +6,11 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from zipfile import ZipFile
 
 COMPETITION = "h-and-m-personalized-fashion-recommendations"
 DESTINATION = Path("data/raw") / COMPETITION
+REQUIRED_FILES = ("transactions_train.csv", "customers.csv", "articles.csv")
 
 
 def main() -> int:
@@ -18,24 +20,29 @@ def main() -> int:
         print("Kaggle CLI is not installed. Run `uv sync --all-groups` first.", file=sys.stderr)
         return 1
     DESTINATION.mkdir(parents=True, exist_ok=True)
-    command = [
-        "kaggle",
-        "competitions",
-        "download",
-        "-c",
-        COMPETITION,
-        "-p",
-        str(DESTINATION),
-        "--unzip",
-    ]
-    result = subprocess.run(command, check=False)
-    if result.returncode:
-        print(
-            "Kaggle download failed. Add a token at ~/.kaggle/kaggle.json "
-            "and accept the competition rules.",
-            file=sys.stderr,
-        )
-    return result.returncode
+    for filename in REQUIRED_FILES:
+        command = [
+            "kaggle",
+            "competitions",
+            "download",
+            COMPETITION,
+            "--file",
+            filename,
+            "--path",
+            str(DESTINATION),
+        ]
+        result = subprocess.run(command, check=False)
+        if result.returncode:
+            print(
+                "Kaggle download failed. Confirm the token and competition rules at Kaggle.",
+                file=sys.stderr,
+            )
+            return result.returncode
+        archive = DESTINATION / f"{filename}.zip"
+        if archive.is_file():
+            with ZipFile(archive) as zip_file:
+                zip_file.extractall(DESTINATION)
+    return 0
 
 
 if __name__ == "__main__":
