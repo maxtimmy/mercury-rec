@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import json
+import resource
+import sys
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from time import perf_counter
 
 import polars as pl
 import yaml
@@ -20,6 +23,7 @@ from mercury_rec.data import (
 )
 from mercury_rec.evaluation import evaluate_rankings
 from mercury_rec.features import build_point_in_time_features, label_candidate_rows
+from mercury_rec.quality import transaction_quality_report
 from mercury_rec.ranker import fit_lambdamart
 from mercury_rec.retrieval import fit_als, fit_trending_popularity
 
@@ -31,6 +35,9 @@ class V2Config:
     horizon_days: int
     popularity_window_days: int
     per_source_limit: int
+    cooccurrence_window_days: int
+    cooccurrence_max_items_per_user: int
+    cooccurrence_max_neighbours: int
     ranking_limit: int
     als_factors: int
     als_regularization: float
@@ -47,6 +54,9 @@ def load_v2_config(path: Path) -> V2Config:
         payload["split"]["horizon_days"],
         payload["popularity"]["window_days"],
         payload["candidates"]["per_source_limit"],
+        payload["cooccurrence"]["window_days"],
+        payload["cooccurrence"]["max_items_per_user"],
+        payload["cooccurrence"]["max_neighbours"],
         payload["ranker"]["ranking_limit"],
         payload["als"]["factors"],
         payload["als"]["regularization"],
@@ -62,33 +72,49 @@ def run_v2_benchmark(config: V2Config) -> Path:
     articles = pl.read_parquet(config.processed_dir / "articles.parquet")
     catalog = set(articles.get_column("item_id").to_list())
     split = make_temporal_split(transactions, config.horizon_days)
+    validation_started = perf_counter()
     validation_rows, _ = _feature_rows_for_period(
         transactions, articles, catalog, split.validation, config
     )
+    validation_feature_seconds = perf_counter() - validation_started
     train_rows = label_candidate_rows(
         validation_rows,
         labels_between(transactions, split.validation),
     )
+    train_started = perf_counter()
     ranker = fit_lambdamart(train_rows, random_seed=config.random_seed)
+    train_seconds = perf_counter() - train_started
+    test_started = perf_counter()
     test_rows, pool = _feature_rows_for_period(transactions, articles, catalog, split.test, config)
+    test_feature_seconds = perf_counter() - test_started
     source_rankings = _source_rankings(pool)
     target = labels_between(transactions, split.test)
     counts = fit_trending_popularity(
         history_before(transactions, split.test.cutoff), config.popularity_window_days
     ).item_counts
+    inference_started = perf_counter()
+    ranked = ranker.rank(test_rows, config.ranking_limit)
+    inference_seconds = perf_counter() - inference_started
     report = {
         "created_at": datetime.now(UTC).isoformat(),
         "config": _jsonable_config(config),
         "split": asdict(split),
         "primary_metric": "ndcg_at_10",
         "guardrails": ["recall_at_50", "coverage_at_50", "novelty_at_50"],
+        "data_quality": transaction_quality_report(transactions),
+        "performance": {
+            "validation_feature_seconds": validation_feature_seconds,
+            "ranker_train_seconds": train_seconds,
+            "test_feature_seconds": test_feature_seconds,
+            "ranker_inference_seconds": inference_seconds,
+            "ranker_model_size_bytes": ranker.serialized_size_bytes(),
+            "peak_rss_mb": _peak_rss_mb(),
+        },
         "candidate_sources": {
             name: evaluate_rankings(ranking, target, catalog, counts, config.k_values)
             for name, ranking in source_rankings.items()
         },
-        "ranker": evaluate_rankings(
-            ranker.rank(test_rows, config.ranking_limit), target, catalog, counts, config.k_values
-        ),
+        "ranker": evaluate_rankings(ranked, target, catalog, counts, config.k_values),
     }
     config.artifacts_dir.mkdir(parents=True, exist_ok=True)
     path = config.artifacts_dir / f"v2-{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}.json"
@@ -121,7 +147,13 @@ def _feature_rows_for_period(
         list(target),
         popularity,
         als,
-        fit_item_cooccurrence(history),
+        fit_item_cooccurrence(
+            history,
+            period.cutoff,
+            window_days=config.cooccurrence_window_days,
+            max_items_per_user=config.cooccurrence_max_items_per_user,
+            max_neighbours=config.cooccurrence_max_neighbours,
+        ),
         per_source_limit=config.per_source_limit,
         available_items=catalog,
     )
@@ -156,3 +188,10 @@ def _jsonable_config(config: V2Config) -> dict[str, object]:
         key: str(value) if isinstance(value, Path) else value
         for key, value in asdict(config).items()
     }
+
+
+def _peak_rss_mb() -> float:
+    """Return process peak RSS in MiB on macOS and Linux."""
+
+    value = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    return value / (1024 * 1024) if sys.platform == "darwin" else value / 1024

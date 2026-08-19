@@ -6,7 +6,11 @@ split:
 popularity:
   window_days: 7
 candidates:
-  per_source_limit: 200
+  per_source_limit: 50
+cooccurrence:
+  window_days: 90
+  max_items_per_user: 20
+  max_neighbours: 100
 ranker:
   ranking_limit: 200
 als:

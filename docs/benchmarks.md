@@ -19,6 +19,16 @@ Run `make train-baseline` after downloading the dataset. Copy measured aggregate
 
 ## V2 — two-stage ranker
 
-V2 is configured but intentionally has no published result yet. Its primary metric is **NDCG@10**; Recall@50, Coverage@50 and Novelty@50 are release guardrails. The training window is the validation cutoff and its following seven-day labels; the final test horizon remains untouched until evaluation.
+Run `v2-20260819T065447Z` used the same 31,788,324-transaction snapshot and final test horizon (cutoff 2020-09-16; labels through 2020-09-22). Candidate sources were limited to 50 items each; co-occurrence used the prior 90 days and at most 20 recent distinct items per user. The local artifact, model and predictions remain ignored by Git.
 
-The benchmark reports Recall/NDCG/MRR plus coverage, novelty and diversity for popularity, ALS, co-occurrence, their candidate union, and the LambdaMART reranker. A model is only considered a challenger after measured test results are added here; V1 remains the baseline, not a champion.
+| Candidate/ranker | Recall@10 | NDCG@10 | MRR@10 | Recall@50 | Coverage@50 | Novelty@50 | Status |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Trending popularity | 0.02221 | 0.01449 | 0.01807 | 0.07294 | 0.00047 | 9.25772 | baseline |
+| ALS | 0.01703 | 0.01231 | 0.01734 | 0.03639 | 0.01810 | 13.80830 | retrieval source |
+| Item-item co-occurrence | 0.00923 | 0.00599 | 0.00888 | 0.03369 | 0.16357 | 12.35797 | retrieval source |
+| Candidate union | 0.02220 | 0.01347 | 0.01700 | 0.06483 | 0.09577 | 11.36198 | retrieval ablation |
+| LambdaMART ranker | 0.03059 | 0.02298 | 0.03319 | 0.08484 | 0.08527 | 9.91964 | challenger |
+
+LambdaMART improves NDCG@10 by 58.6% relative to the best V1 baseline (0.02298 vs 0.01449). It also improves all release guardrails relative to popularity: Recall@50 (+16.3%), Coverage@50 and Novelty@50 (+7.1%). It therefore passes the challenger gate, but is **not** an online champion: no serving or online experiment exists yet.
+
+Performance on the local benchmark host: validation feature generation 348.57s, ranker training 47.32s, test feature generation 346.70s, ranker inference 20.91s, serialized model 359,527 bytes, peak RSS 9,470 MiB. The normalized snapshot had zero nulls, a 9.36% exact-duplicate rate, 1,362,281 users and 104,547 items. The current diversity statistic verifies within-list deduplication; category-level diversity remains a future business-rule metric.

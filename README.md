@@ -2,7 +2,7 @@
 
 MercuryRec — портфолио-проект production-minded рекомендательной системы для e-commerce. Система формирует персональный топ товаров по запросу API и демонстрирует полный ML lifecycle: события, point-in-time признаки, retrieval, ranking, serving, мониторинг и controlled retraining.
 
-> Статус: V1 — измеренный offline baseline; V2 — реализованный two-stage offline pipeline, ожидающий публикации воспроизводимых test-метрик. Champion пока не назначен. Целевые SLO остаются гипотезами до измерений.
+> Статус: V1 — измеренный offline baseline; V2 — измеренный offline challenger с two-stage LambdaMART. Champion пока не назначен, поскольку serving и online evaluation ещё не реализованы. Целевые SLO остаются гипотезами до измерений.
 
 ## Задача
 
@@ -33,7 +33,7 @@ Client ────────────────────────�
 | Версия | Результат | Критерий готовности |
 |---|---|---|
 | V1 | Popularity + ALS и temporal evaluation | Измеренный воспроизводимый baseline без leakage |
-| V2 | Multi-source candidates + LightGBM ranker | Пайплайн реализован; test-метрики retrieval/ranking ожидают публикации |
+| V2 | Multi-source candidates + LightGBM ranker | Измеренный offline challenger; нет online champion decision |
 | V3 | FastAPI, Redis, Docker, load test | Измерены P50/P95/P99, RPS и error rate |
 | V4 | Feast, MLflow, retraining pipeline | Единые feature definitions, model lineage и quality gate |
 | V5 | Redpanda event replay и свежие online features | Задокументирована задержка propagation события |
@@ -94,4 +94,4 @@ make train-baseline
 make train-v2
 ```
 
-Результаты V2 становятся основанием для выбора challenger только после добавления агрегированных test-метрик в [benchmarks.md](docs/benchmarks.md). Данные, token, ML artifacts и пользовательские предсказания намеренно не попадают в Git.
+Агрегированные V2 test-метрики и offline challenger decision опубликованы в [benchmarks.md](docs/benchmarks.md). Данные, token, ML artifacts и пользовательские предсказания намеренно не попадают в Git.

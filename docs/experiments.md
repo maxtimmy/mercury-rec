@@ -11,10 +11,10 @@
 
 | ID | Date | Model | Candidate sources/budget | Feature set | Split | NDCG@10 | Recall@50 | P95 | Status |
 |---|---|---|---|---|---|---:|---:|---:|---|
-| EXP-001 | — | Global popularity | popularity / 50 | none | TBD | TBD | TBD | TBD | planned |
-| EXP-002 | — | ALS | ALS / 200 | none | TBD | TBD | TBD | TBD | planned |
-| EXP-003 | — | Two-tower | mixed / 200 | retrieval features | TBD | TBD | TBD | TBD | planned |
-| EXP-004 | — | Two-tower + LambdaMART | mixed / 200 | v1 PIT | TBD | TBD | TBD | TBD | planned |
+| EXP-001 | 2026-08-18 | Global popularity | popularity / 50 | none | test 2020-09-16 | 0.01449 | 0.07294 | — | measured baseline |
+| EXP-002 | 2026-08-18 | ALS | ALS / 50 | none | test 2020-09-16 | 0.01231 | 0.03639 | — | measured retrieval source |
+| EXP-003 | 2026-08-19 | Item-item co-occurrence | co-occurrence / 50 | 90d, latest 20 items | test 2020-09-16 | 0.00599 | 0.03369 | — | measured retrieval source |
+| EXP-004 | 2026-08-19 | LambdaMART | popularity + ALS + item-item / 50 each | point-in-time user/item/affinity | test 2020-09-16 | 0.02298 | 0.08484 | — | challenger |
 
 ## Cost/latency decision record
 
