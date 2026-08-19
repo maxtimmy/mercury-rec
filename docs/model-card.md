@@ -1,17 +1,17 @@
 # Model Card — Ranking model
 
-> Заполняется при первом кандидате на registry. Не утверждать model performance до завершения зафиксированной evaluation.
+> Offline challenger; не registry champion и не доказательство online impact.
 
 ## Identity
 
 | Field | Value |
 |---|---|
-| Model name/version | TBD |
+| Model name/version | `v2-20260819T065447Z` LambdaMART |
 | Role | Candidate ranker |
-| Owner | TBD |
-| Registry URI/run | TBD |
-| Git SHA/config | TBD |
-| Dataset/split version | TBD |
+| Owner | MercuryRec contributors |
+| Registry URI/run | Not registered; local artifact only |
+| Git SHA/config | `configs/v2-two-stage.yaml`, seed 42 |
+| Dataset/split version | H&M snapshot 1c62791bac6a; validation cutoff 2020-09-09, test cutoff 2020-09-16 |
 
 ## Intended use
 
@@ -25,11 +25,11 @@
 
 ## Training and evaluation
 
-- Label/horizon: TBD.
-- Negative sampling: TBD.
-- Temporal boundaries: TBD.
-- Primary metric/guardrails: TBD.
-- Results and slices: TBD (ссылка на MLflow and `experiments.md`).
+- Label/horizon: purchase in the following 7-day horizon.
+- Negative sampling: non-purchased items already present in the point-in-time candidate pool.
+- Temporal boundaries: validation 2020-09-09–2020-09-15; test 2020-09-16–2020-09-22.
+- Primary metric/guardrails: NDCG@10; Recall@50, Coverage@50 and Novelty@50.
+- Results: NDCG@10 0.02298, Recall@50 0.08484; passes the offline challenger gate. Full aggregate ablation: [benchmarks.md](benchmarks.md).
 
 ## Limitations and risks
 

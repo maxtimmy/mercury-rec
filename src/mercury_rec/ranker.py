@@ -25,6 +25,11 @@ class LambdaMARTRanker:
             for user_id, group in scored.group_by("user_id", maintain_order=True)
         }
 
+    def serialized_size_bytes(self) -> int:
+        """Return the size of the portable LightGBM text representation."""
+
+        return len(self.model.booster_.model_to_string().encode("utf-8"))
+
 
 def fit_lambdamart(
     rows: pl.DataFrame, *, random_seed: int = 42, n_estimators: int = 100

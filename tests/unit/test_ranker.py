@@ -30,7 +30,9 @@ def test_synthetic_candidates_features_and_ranker_produce_ranked_response() -> N
         build_point_in_time_features(history, candidates, cutoff), {"u1": {"a"}, "u2": {"b"}}
     )
 
-    ranked = fit_lambdamart(rows, n_estimators=5).rank(rows, limit=2)
+    ranker = fit_lambdamart(rows, n_estimators=5)
+    ranked = ranker.rank(rows, limit=2)
 
     assert set(ranked) == {"u1", "u2"}
     assert all(len(items) == 2 for items in ranked.values())
+    assert ranker.serialized_size_bytes() > 0
